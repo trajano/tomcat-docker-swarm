@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  proxy:
+    build: ./proxy
+    ports:
+      - 50000:80
+    environment:
+      - CLUSTER_NAME=tomcat
+  tomcat:
+    build: ./tomcat
+    deploy:
+      replicas: 3
+      endpoint_mode: dnsrr
