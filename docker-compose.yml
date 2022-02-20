@@ -25,8 +25,9 @@ services:
         - "traefik.http.routers.app.entrypoints=app"
         - "traefik.http.routers.app.rule=Host(`localhost`)"
         - "traefik.http.services.app-service.loadBalancer.sticky.cookie=true"
-        - "traefik.http.services.app-service.loadBalancer.sticky.cookie.name=app_cookie_name"
+        - "traefik.http.services.app-service.loadBalancer.sticky.cookie.httponly=true"
         - "traefik.http.services.app-service.loadbalancer.server.port=8080"
+        - "traefik.http.services.app-service.loadbalancer.healthcheck.path=/"
       update_config:
         order: start-first
       endpoint_mode: dnsrr
