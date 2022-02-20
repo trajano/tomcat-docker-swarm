@@ -1,13 +1,32 @@
 version: "3.8"
 services:
   proxy:
-    build: ./proxy
+    image: traefik:2.6
+    command:
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.app.address=:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - 50000:80
-    environment:
-      - CLUSTER_NAME=tomcat
   tomcat:
     build: ./tomcat
+    image: sample-tomcat-${RUNID}
+    environment:
+      - DNS_MEMBERSHIP_SERVICE_NAME=tomcat
     deploy:
-      replicas: 3
+      resources:
+        limits:
+          memory: 128M
+      replicas: 6
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.app.entrypoints=app"
+        - "traefik.http.routers.app.rule=Host(`localhost`)"
+        - "traefik.http.services.app-service.loadBalancer.sticky.cookie=true"
+        - "traefik.http.services.app-service.loadBalancer.sticky.cookie.name=app_cookie_name"
+        - "traefik.http.services.app-service.loadbalancer.server.port=8080"
+      update_config:
+        order: start-first
       endpoint_mode: dnsrr
